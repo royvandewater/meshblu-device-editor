@@ -5,13 +5,18 @@ class App.DeviceFindOrCreate extends Backbone.Model
   initialize: =>
     @on 'change:uuid change:token', @setCanCreate
     @on 'change:uuid change:token', @setCanGet
-    @on 'change:device', @parseDevice
+    @on 'sync', @parseDevice
     @setCanCreate()
     @setCanGet()
     @parseDevice()
 
   create: =>
-    @save({})
+    device = new App.Device
+    @listenToOnce device, 'sync', =>
+      {uuid,token} = device.toJSON()
+      @set uuid: uuid, token: token, device: device.toJSON()
+      @trigger 'sync'
+    device.save()
 
   find: =>
     {uuid, token} = @toJSON()

@@ -3,6 +3,7 @@ class App.DeviceEditView extends Backbone.View
 
   initialize: =>
     @listenTo @model, 'change:jsonIsInvalid', @setValidationError
+    @listenTo @model, 'change:json', @setValues
 
   events:
     'submit form': 'submit'
@@ -26,8 +27,7 @@ class App.DeviceEditView extends Backbone.View
   submit: ($event) =>
     $event.preventDefault()
     $event.stopPropagation()
-    {json} = @values()
-    @model.saveJSON json
+    @model.save()
 
   values: =>
     json: @$('textarea[name=json]').val()

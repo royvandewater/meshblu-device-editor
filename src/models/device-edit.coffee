@@ -3,6 +3,10 @@ class App.DeviceEdit extends Backbone.Model
     @on 'change:json', @setDevice
     @setDevice()
 
+  save: =>
+    device = new App.Device @get('device')
+    device.save()
+
   setDevice: =>
     object = @parseJSON()
     if object?
