@@ -4,15 +4,34 @@
 }).call(this);
 
 (function() {
-  var __hasProp = {}.hasOwnProperty,
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   App.DeviceEdit = (function(_super) {
     __extends(DeviceEdit, _super);
 
     function DeviceEdit() {
+      this.setDevice = __bind(this.setDevice, this);
+      this.parseJSON = __bind(this.parseJSON, this);
+      this.initialize = __bind(this.initialize, this);
       return DeviceEdit.__super__.constructor.apply(this, arguments);
     }
+
+    DeviceEdit.prototype.initialize = function() {
+      this.on('change:json', this.setDevice);
+      return this.setDevice();
+    };
+
+    DeviceEdit.prototype.parseJSON = function() {
+      return JSON;
+    };
+
+    DeviceEdit.prototype.setDevice = function() {
+      return this.set({
+        device: JSON.parse(this.get('json'))
+      });
+    };
 
     return DeviceEdit;
 
@@ -230,6 +249,7 @@
       this.submitForm = __bind(this.submitForm, this);
       this.clickCreate = __bind(this.clickCreate, this);
       this.setValues = __bind(this.setValues, this);
+      this.navigate = __bind(this.navigate, this);
       this.render = __bind(this.render, this);
       this.initialize = __bind(this.initialize, this);
       return DeviceFindOrCreateView.__super__.constructor.apply(this, arguments);
@@ -241,7 +261,8 @@
 
     DeviceFindOrCreateView.prototype.initialize = function() {
       this.listenTo(this.model, 'change', this.setValues);
-      return this.listenTo(this.model, 'sync', this.render);
+      this.listenTo(this.model, 'sync', this.render);
+      return this.listenTo(this.model, 'sync', this.navigate);
     };
 
     DeviceFindOrCreateView.prototype.events = {
@@ -261,6 +282,12 @@
         this.$el.append(view.render());
       }
       return this.$el;
+    };
+
+    DeviceFindOrCreateView.prototype.navigate = function() {
+      var token, uuid, _ref;
+      _ref = this.model.toJSON(), uuid = _ref.uuid, token = _ref.token;
+      return Backbone.history.navigate("/" + uuid + "/" + token);
     };
 
     DeviceFindOrCreateView.prototype.setValues = function() {
@@ -332,7 +359,6 @@
 
     DevicesRouter.prototype.edit = function(uuid, token) {
       var device, view;
-      console.log('edit', uuid, token);
       device = new App.DeviceFindOrCreate({
         uuid: uuid,
         token: token

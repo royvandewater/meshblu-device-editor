@@ -5,3 +5,6 @@ class App.DeviceEdit extends Backbone.Model
 
   parseJSON: =>
     JSON
+
+  setDevice: =>
+    @set device: JSON.parse(@get('json'))

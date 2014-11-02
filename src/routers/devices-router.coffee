@@ -9,7 +9,6 @@ class DevicesRouter extends Backbone.Router
     $('#main').html view.render()
 
   edit: (uuid, token) =>
-    console.log 'edit', uuid, token
     device = new App.DeviceFindOrCreate uuid: uuid, token: token
     device.find()
     view = new App.DeviceFindOrCreateView model: device

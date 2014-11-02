@@ -26,6 +26,7 @@
     "gulp-coffee": "^2.2.0",
     "gulp-concat": "^2.4.1",
     "gulp-eco": "0.0.2",
-    "gulp-util": "^3.0.1"
+    "gulp-util": "^3.0.1",
+    "gulp-webserver": "^0.8.6"
   }
 }

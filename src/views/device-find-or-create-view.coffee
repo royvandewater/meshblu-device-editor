@@ -5,6 +5,7 @@ class App.DeviceFindOrCreateView extends Backbone.View
   initialize: =>
     @listenTo @model, 'change', @setValues
     @listenTo @model, 'sync',   @render
+    @listenTo @model, 'sync',   @navigate
 
   events:
     'keyup input':       'updateModel'
@@ -18,6 +19,10 @@ class App.DeviceFindOrCreateView extends Backbone.View
       view = new App.DeviceEditView model: @model.deviceEdit
       @$el.append view.render()
     @$el
+
+  navigate: =>
+    {uuid, token} = @model.toJSON()
+    Backbone.history.navigate "/#{uuid}/#{token}"
 
   setValues: =>
     values = @model.toJSON()

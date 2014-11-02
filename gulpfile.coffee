@@ -1,8 +1,9 @@
-gulp   = require 'gulp'
-coffee = require 'gulp-coffee'
-concat = require 'gulp-concat'
-eco    = require 'gulp-eco'
-gutil  = require 'gulp-util'
+gulp      = require 'gulp'
+coffee    = require 'gulp-coffee'
+concat    = require 'gulp-concat'
+eco       = require 'gulp-eco'
+webserver = require 'gulp-webserver'
+gutil     = require 'gulp-util'
 
 COFFEE_FILES = [
   './src/config.coffee'
@@ -25,8 +26,12 @@ gulp.task 'eco', ->
       .pipe(concat('templates.js'))
       .pipe(gulp.dest('./dist'))
 
+gulp.task 'webserver', ->
+  gulp.src ['.']
+      .pipe webserver(livereload: true)
+
 gulp.task 'default', ['coffee', 'eco'], ->
 
-gulp.task 'watch', ['coffee', 'eco'], ->
+gulp.task 'watch', ['coffee', 'eco', 'webserver'], ->
   gulp.watch COFFEE_FILES, ['coffee']
   gulp.watch ['templates/*.eco'], ['eco']
