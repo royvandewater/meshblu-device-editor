@@ -1,0 +1,23 @@
+{
+  "name": "meshblu-device-editor",
+  "version": "1.0.0",
+  "description": "Meshblu Device Editor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/royvandewater/meshblu-device-editor.git"
+  },
+  "keywords": [
+    "meshblu",
+    "device"
+  ],
+  "author": "Roy van de Water",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/royvandewater/meshblu-device-editor/issues"
+  },
+  "homepage": "https://github.com/royvandewater/meshblu-device-editor"
+}
