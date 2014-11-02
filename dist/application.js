@@ -14,11 +14,16 @@
     function DeviceFindOrCreate() {
       this.setCanGet = __bind(this.setCanGet, this);
       this.setCanCreate = __bind(this.setCanCreate, this);
+      this.parse = __bind(this.parse, this);
       this.find = __bind(this.find, this);
       this.create = __bind(this.create, this);
       this.initialize = __bind(this.initialize, this);
       return DeviceFindOrCreate.__super__.constructor.apply(this, arguments);
     }
+
+    DeviceFindOrCreate.prototype.idAttribute = 'uuid';
+
+    DeviceFindOrCreate.prototype.urlRoot = 'https://meshblu.octoblu.com/devices/';
 
     DeviceFindOrCreate.prototype.initialize = function() {
       this.on('change:uuid change:token', this.setCanCreate);
@@ -28,11 +33,31 @@
     };
 
     DeviceFindOrCreate.prototype.create = function() {
-      return console.log('create');
+      return this.save({});
     };
 
     DeviceFindOrCreate.prototype.find = function() {
-      return console.log('find');
+      var token, uuid, _ref;
+      _ref = this.toJSON(), uuid = _ref.uuid, token = _ref.token;
+      return this.fetch({
+        headers: {
+          skynet_auth_uuid: uuid,
+          skynet_auth_token: token
+        }
+      });
+    };
+
+    DeviceFindOrCreate.prototype.parse = function(results) {
+      var data;
+      data = results;
+      if (_.isArray(data.devices)) {
+        data = _.first(data.devices);
+      }
+      return {
+        uuid: data.uuid,
+        token: data.token,
+        device: data
+      };
     };
 
     DeviceFindOrCreate.prototype.setCanCreate = function() {
@@ -45,12 +70,13 @@
     };
 
     DeviceFindOrCreate.prototype.setCanGet = function() {
-      var token, uuid;
+      var token, uuid, _ref;
       uuid = this.get('uuid');
       token = this.get('token');
-      return this.set({
+      this.set({
         canGet: !!(uuid && token)
       });
+      return _ref = this.toJSON(), uuid = _ref.uuid, token = _ref.token, _ref;
     };
 
     return DeviceFindOrCreate;
@@ -96,6 +122,8 @@
     }
 
     DeviceFindOrCreateView.prototype.template = JST['device-find-or-create'];
+
+    DeviceFindOrCreateView.prototype.className = 'device-find-or-create';
 
     DeviceFindOrCreateView.prototype.initialize = function() {
       return this.listenTo(this.model, 'change', this.setValues);
@@ -168,7 +196,7 @@
 
     DevicesRouter.prototype.routes = {
       '': 'findOrCreate',
-      'edit/:uuid/:token': 'edit'
+      ':uuid/:token': 'edit'
     };
 
     DevicesRouter.prototype.findOrCreate = function() {
@@ -182,15 +210,16 @@
 
     DevicesRouter.prototype.edit = function(uuid, token) {
       var device, view;
-      device = new App.Device({
+      console.log('edit', uuid, token);
+      device = new App.DeviceFindOrCreate({
         uuid: uuid,
         token: token
       });
-      view = new App.DeviceEditView({
+      device.find();
+      view = new App.DeviceFindOrCreateView({
         model: device
       });
-      $('#main').html(view.render());
-      return device.fetch();
+      return $('#main').html(view.render());
     };
 
     return DevicesRouter;
@@ -204,7 +233,7 @@
 (function() {
   $(function() {
     return Backbone.history.start({
-      pushState: true
+      pushState: false
     });
   });
 

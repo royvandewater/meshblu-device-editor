@@ -1,5 +1,6 @@
 class App.DeviceFindOrCreateView extends Backbone.View
   template: JST['device-find-or-create']
+  className: 'device-find-or-create'
 
   initialize: =>
     @listenTo @model, 'change', @setValues
