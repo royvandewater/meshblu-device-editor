@@ -13,18 +13,21 @@ class App.DeviceFindOrCreate extends Backbone.Model
   create: =>
     device = new App.Device
     @listenToOnce device, 'sync', =>
-      {uuid,token} = device.toJSON()
-      @set uuid: uuid, token: token, device: device.toJSON()
+      deviceJSON = device.toJSON()
+      {uuid,token} = deviceJSON
+      @set uuid: uuid, token: token, device: deviceJSON
       @trigger 'sync'
     device.save()
 
   find: =>
     {uuid, token} = @toJSON()
-
-    @fetch
-      headers:
-        skynet_auth_uuid:  uuid
-        skynet_auth_token: token
+    device = new App.Device uuid: uuid, token: token
+    @listenToOnce device, 'sync', =>
+      deviceJSON = device.toJSON()
+      {uuid,token} = deviceJSON
+      @set uuid: uuid, token: token, device: deviceJSON
+      @trigger 'sync'
+    device.fetch()
 
   parse: (results) =>
     data = results
@@ -37,7 +40,8 @@ class App.DeviceFindOrCreate extends Backbone.Model
 
   parseDevice: =>
     return unless @has 'device'
-    json = JSON.stringify @get('device'), null, 2
+    deviceJSON = _.omit @get('device'), '_id'
+    json = JSON.stringify deviceJSON, null, 2
     @deviceEdit = new App.DeviceEdit json: json
 
   setCanCreate: =>

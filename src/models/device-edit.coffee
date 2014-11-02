@@ -5,7 +5,12 @@ class App.DeviceEdit extends Backbone.Model
 
   save: =>
     device = new App.Device @get('device')
-    device.save()
+
+    device.save {}, success: =>
+      device.fetch success: =>
+        @set json: JSON.stringify(device.toJSON(), null, 2)
+        @trigger 'sync'
+    @trigger 'request'
 
   setDevice: =>
     object = @parseJSON()

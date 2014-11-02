@@ -4,6 +4,8 @@ class App.DeviceEditView extends Backbone.View
   initialize: =>
     @listenTo @model, 'change:jsonIsInvalid', @setValidationError
     @listenTo @model, 'change:json', @setValues
+    @listenTo @model, 'request', @showLoading
+    @listenTo @model, 'sync', @hideLoading
 
   events:
     'submit form': 'submit'
@@ -13,6 +15,7 @@ class App.DeviceEditView extends Backbone.View
     @$el.html @template validationError: @model.validationError
     @setValues()
     @setValidationError()
+    @hideLoading()
     @$el
 
   setValues: =>
@@ -23,6 +26,12 @@ class App.DeviceEditView extends Backbone.View
     {jsonIsInvalid} = @model.toJSON()
     @$('.text-invalid-json').toggle jsonIsInvalid
     @$('.btn-save').prop 'disabled', jsonIsInvalid
+
+  showLoading: =>
+    @$('.loading-spinner').show()
+
+  hideLoading: =>
+    @$('.loading-spinner').hide()
 
   submit: ($event) =>
     $event.preventDefault()

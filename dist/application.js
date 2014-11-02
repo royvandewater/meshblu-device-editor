@@ -27,7 +27,21 @@
     DeviceEdit.prototype.save = function() {
       var device;
       device = new App.Device(this.get('device'));
-      return device.save();
+      device.save({}, {
+        success: (function(_this) {
+          return function() {
+            return device.fetch({
+              success: function() {
+                _this.set({
+                  json: JSON.stringify(device.toJSON(), null, 2)
+                });
+                return _this.trigger('sync');
+              }
+            });
+          };
+        })(this)
+      });
+      return this.trigger('request');
     };
 
     DeviceEdit.prototype.setDevice = function() {
@@ -100,12 +114,13 @@
       device = new App.Device;
       this.listenToOnce(device, 'sync', (function(_this) {
         return function() {
-          var token, uuid, _ref;
-          _ref = device.toJSON(), uuid = _ref.uuid, token = _ref.token;
+          var deviceJSON, token, uuid;
+          deviceJSON = device.toJSON();
+          uuid = deviceJSON.uuid, token = deviceJSON.token;
           _this.set({
             uuid: uuid,
             token: token,
-            device: device.toJSON()
+            device: deviceJSON
           });
           return _this.trigger('sync');
         };
@@ -114,14 +129,26 @@
     };
 
     DeviceFindOrCreate.prototype.find = function() {
-      var token, uuid, _ref;
+      var device, token, uuid, _ref;
       _ref = this.toJSON(), uuid = _ref.uuid, token = _ref.token;
-      return this.fetch({
-        headers: {
-          skynet_auth_uuid: uuid,
-          skynet_auth_token: token
-        }
+      device = new App.Device({
+        uuid: uuid,
+        token: token
       });
+      this.listenToOnce(device, 'sync', (function(_this) {
+        return function() {
+          var deviceJSON;
+          deviceJSON = device.toJSON();
+          uuid = deviceJSON.uuid, token = deviceJSON.token;
+          _this.set({
+            uuid: uuid,
+            token: token,
+            device: deviceJSON
+          });
+          return _this.trigger('sync');
+        };
+      })(this));
+      return device.fetch();
     };
 
     DeviceFindOrCreate.prototype.parse = function(results) {
@@ -138,11 +165,12 @@
     };
 
     DeviceFindOrCreate.prototype.parseDevice = function() {
-      var json;
+      var deviceJSON, json;
       if (!this.has('device')) {
         return;
       }
-      json = JSON.stringify(this.get('device'), null, 2);
+      deviceJSON = _.omit(this.get('device'), '_id');
+      json = JSON.stringify(deviceJSON, null, 2);
       return this.deviceEdit = new App.DeviceEdit({
         json: json
       });
@@ -183,6 +211,11 @@
 
     function Device() {
       this.save = __bind(this.save, this);
+      this.parse = __bind(this.parse, this);
+      this.fetch = __bind(this.fetch, this);
+      this.ajaxOptions = __bind(this.ajaxOptions, this);
+      this.unset_id = __bind(this.unset_id, this);
+      this.initialize = __bind(this.initialize, this);
       return Device.__super__.constructor.apply(this, arguments);
     }
 
@@ -190,16 +223,40 @@
 
     Device.prototype.urlRoot = 'https://meshblu.octoblu.com/devices/';
 
-    Device.prototype.save = function(attributes, options) {
-      var ajaxOptions, token, uuid, _ref;
+    Device.prototype.initialize = function() {
+      this.on('change:_id', this.unset_id);
+      return this.unset_id();
+    };
+
+    Device.prototype.unset_id = function() {
+      return this.unset('_id');
+    };
+
+    Device.prototype.ajaxOptions = function() {
+      var token, uuid, _ref;
       _ref = this.toJSON(), uuid = _ref.uuid, token = _ref.token;
-      ajaxOptions = {
+      return {
         headers: {
           skynet_auth_uuid: uuid,
           skynet_auth_token: token
         }
       };
-      options = _.defaults({}, options, ajaxOptions);
+    };
+
+    Device.prototype.fetch = function(options) {
+      options = _.defaults({}, options, this.ajaxOptions());
+      return Device.__super__.fetch.call(this, options);
+    };
+
+    Device.prototype.parse = function(data) {
+      if (_.isArray(data.devices)) {
+        return _.first(data.devices);
+      }
+      return data;
+    };
+
+    Device.prototype.save = function(attributes, options) {
+      options = _.defaults({}, options, this.ajaxOptions());
       return Device.__super__.save.call(this, attributes, options);
     };
 
@@ -221,6 +278,8 @@
       this.validateJSON = __bind(this.validateJSON, this);
       this.values = __bind(this.values, this);
       this.submit = __bind(this.submit, this);
+      this.hideLoading = __bind(this.hideLoading, this);
+      this.showLoading = __bind(this.showLoading, this);
       this.setValidationError = __bind(this.setValidationError, this);
       this.setValues = __bind(this.setValues, this);
       this.render = __bind(this.render, this);
@@ -232,7 +291,9 @@
 
     DeviceEditView.prototype.initialize = function() {
       this.listenTo(this.model, 'change:jsonIsInvalid', this.setValidationError);
-      return this.listenTo(this.model, 'change:json', this.setValues);
+      this.listenTo(this.model, 'change:json', this.setValues);
+      this.listenTo(this.model, 'request', this.showLoading);
+      return this.listenTo(this.model, 'sync', this.hideLoading);
     };
 
     DeviceEditView.prototype.events = {
@@ -246,6 +307,7 @@
       }));
       this.setValues();
       this.setValidationError();
+      this.hideLoading();
       return this.$el;
     };
 
@@ -260,6 +322,14 @@
       jsonIsInvalid = this.model.toJSON().jsonIsInvalid;
       this.$('.text-invalid-json').toggle(jsonIsInvalid);
       return this.$('.btn-save').prop('disabled', jsonIsInvalid);
+    };
+
+    DeviceEditView.prototype.showLoading = function() {
+      return this.$('.loading-spinner').show();
+    };
+
+    DeviceEditView.prototype.hideLoading = function() {
+      return this.$('.loading-spinner').hide();
     };
 
     DeviceEditView.prototype.submit = function($event) {

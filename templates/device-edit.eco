@@ -5,6 +5,7 @@
     <span class="text-danger text-invalid-json">
       Invalid JSON
     </span>
+    <i class="fa fa-spin fa-refresh loading-spinner"></i>
   </div>
-  <textarea name="json" cols="30" rows="50" class="col-xs-12"></textarea>
+  <textarea name="json" cols="30" rows="30" class="col-xs-12"></textarea>
 </form>
