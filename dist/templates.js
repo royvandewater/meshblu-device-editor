@@ -40,7 +40,7 @@ window.JST["device-edit"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<h1>Hello World</h1>\n');
+      __out.push('<h1>Edit Device</h1>\n\n<p>Enter your uuid and token and press GET to get started</p>\n\n<div class="row">\n  <div class="col-xs-12">\n    <form class="form-inline">\n      <input type="text" name="uuid" class="form-control" placeholder="UUID">\n      <input type="text" name="token" class="form-control" placeholder="Token">\n\n      <button class="btn btn-primary btn-get">Get</button>\n      <button class="btn btn-success btn-create">Create</button>\n    </form>\n  </div>\n</div>\n');
     
     }).call(this);
     

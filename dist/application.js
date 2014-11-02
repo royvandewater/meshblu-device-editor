@@ -29,14 +29,38 @@
     __extends(DeviceEditView, _super);
 
     function DeviceEditView() {
+      this.values = __bind(this.values, this);
+      this.setButtonStates = __bind(this.setButtonStates, this);
       this.render = __bind(this.render, this);
       return DeviceEditView.__super__.constructor.apply(this, arguments);
     }
 
     DeviceEditView.prototype.template = JST['device-edit'];
 
+    DeviceEditView.prototype.events = {
+      'keyup input': 'setButtonStates'
+    };
+
     DeviceEditView.prototype.render = function() {
-      return this.template();
+      this.$el.html(this.template());
+      this.setButtonStates();
+      return this.$el;
+    };
+
+    DeviceEditView.prototype.setButtonStates = function() {
+      var disableCreate, disableGet, token, uuid, _ref;
+      _ref = this.values(), uuid = _ref.uuid, token = _ref.token;
+      disableGet = !(uuid && token);
+      disableCreate = !!(uuid || token);
+      this.$('.btn-get').prop('disabled', disableGet);
+      return this.$('.btn-create').prop('disabled', disableCreate);
+    };
+
+    DeviceEditView.prototype.values = function() {
+      return {
+        uuid: this.$('input[name=uuid]').val(),
+        token: this.$('input[name=token]').val()
+      };
     };
 
     return DeviceEditView;
