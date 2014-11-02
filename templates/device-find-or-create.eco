@@ -1,15 +1,16 @@
-<h1>Edit Device</h1>
+<h1>Find or Create Device</h1>
 
-<p>Enter your uuid and token and press GET to get started</p>
+<p>Create a new device or enter your uuid and token and press GET to get started</p>
 
 <div class="row">
   <div class="col-xs-12">
     <form class="form-inline">
+      <button class="btn btn-success btn-create">Create</button>
+
       <input type="text" name="uuid" class="form-control" placeholder="UUID">
       <input type="text" name="token" class="form-control" placeholder="Token">
 
       <button class="btn btn-primary btn-get">Get</button>
-      <button class="btn btn-success btn-create">Create</button>
     </form>
   </div>
 </div>

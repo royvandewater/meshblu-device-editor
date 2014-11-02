@@ -1,5 +1,5 @@
-class App.DeviceEditView extends Backbone.View
-  template: JST['device-edit']
+class App.DeviceFindOrCreateView extends Backbone.View
+  template: JST['device-find-or-create']
 
   events:
     'keyup input': 'setButtonStates'

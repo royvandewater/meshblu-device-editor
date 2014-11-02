@@ -25,29 +25,29 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  App.DeviceEditView = (function(_super) {
-    __extends(DeviceEditView, _super);
+  App.DeviceFindOrCreateView = (function(_super) {
+    __extends(DeviceFindOrCreateView, _super);
 
-    function DeviceEditView() {
+    function DeviceFindOrCreateView() {
       this.values = __bind(this.values, this);
       this.setButtonStates = __bind(this.setButtonStates, this);
       this.render = __bind(this.render, this);
-      return DeviceEditView.__super__.constructor.apply(this, arguments);
+      return DeviceFindOrCreateView.__super__.constructor.apply(this, arguments);
     }
 
-    DeviceEditView.prototype.template = JST['device-edit'];
+    DeviceFindOrCreateView.prototype.template = JST['device-find-or-create'];
 
-    DeviceEditView.prototype.events = {
+    DeviceFindOrCreateView.prototype.events = {
       'keyup input': 'setButtonStates'
     };
 
-    DeviceEditView.prototype.render = function() {
+    DeviceFindOrCreateView.prototype.render = function() {
       this.$el.html(this.template());
       this.setButtonStates();
       return this.$el;
     };
 
-    DeviceEditView.prototype.setButtonStates = function() {
+    DeviceFindOrCreateView.prototype.setButtonStates = function() {
       var disableCreate, disableGet, token, uuid, _ref;
       _ref = this.values(), uuid = _ref.uuid, token = _ref.token;
       disableGet = !(uuid && token);
@@ -56,14 +56,14 @@
       return this.$('.btn-create').prop('disabled', disableCreate);
     };
 
-    DeviceEditView.prototype.values = function() {
+    DeviceFindOrCreateView.prototype.values = function() {
       return {
         uuid: this.$('input[name=uuid]').val(),
         token: this.$('input[name=token]').val()
       };
     };
 
-    return DeviceEditView;
+    return DeviceFindOrCreateView;
 
   })(Backbone.View);
 
@@ -80,20 +80,35 @@
 
     function DevicesRouter() {
       this.edit = __bind(this.edit, this);
+      this.findOrCreate = __bind(this.findOrCreate, this);
       return DevicesRouter.__super__.constructor.apply(this, arguments);
     }
 
     DevicesRouter.prototype.routes = {
-      '': 'edit'
+      '': 'findOrCreate',
+      'edit/:uuid/:token': 'edit'
     };
 
-    DevicesRouter.prototype.edit = function() {
+    DevicesRouter.prototype.findOrCreate = function() {
       var device, view;
       device = new App.Device;
-      view = new App.DeviceEditView({
+      view = new App.DeviceFindOrCreateView({
         model: device
       });
       return $('#main').html(view.render());
+    };
+
+    DevicesRouter.prototype.edit = function(uuid, token) {
+      var device, view;
+      device = new App.Device({
+        uuid: uuid,
+        token: token
+      });
+      view = new App.DeviceEditView({
+        model: device
+      });
+      $('#main').html(view.render());
+      return device.fetch();
     };
 
     return DevicesRouter;

@@ -1,7 +1,7 @@
 if (!window.JST) {
   window.JST = {};
 }
-window.JST["device-edit"] = function (__obj) {
+window.JST["device-find-or-create"] = function (__obj) {
   if (!__obj) __obj = {};
   var __out = [], __capture = function(callback) {
     var out = __out, result;
@@ -40,7 +40,7 @@ window.JST["device-edit"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<h1>Edit Device</h1>\n\n<p>Enter your uuid and token and press GET to get started</p>\n\n<div class="row">\n  <div class="col-xs-12">\n    <form class="form-inline">\n      <input type="text" name="uuid" class="form-control" placeholder="UUID">\n      <input type="text" name="token" class="form-control" placeholder="Token">\n\n      <button class="btn btn-primary btn-get">Get</button>\n      <button class="btn btn-success btn-create">Create</button>\n    </form>\n  </div>\n</div>\n');
+      __out.push('<h1>Find or Create Device</h1>\n\n<p>Create a new device or enter your uuid and token and press GET to get started</p>\n\n<div class="row">\n  <div class="col-xs-12">\n    <form class="form-inline">\n      <button class="btn btn-success btn-create">Create</button>\n\n      <input type="text" name="uuid" class="form-control" placeholder="UUID">\n      <input type="text" name="token" class="form-control" placeholder="Token">\n\n      <button class="btn btn-primary btn-get">Get</button>\n    </form>\n  </div>\n</div>\n');
     
     }).call(this);
     
