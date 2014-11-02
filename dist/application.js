@@ -4,6 +4,23 @@
 }).call(this);
 
 (function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  App.DeviceEdit = (function(_super) {
+    __extends(DeviceEdit, _super);
+
+    function DeviceEdit() {
+      return DeviceEdit.__super__.constructor.apply(this, arguments);
+    }
+
+    return DeviceEdit;
+
+  })(Backbone.Model);
+
+}).call(this);
+
+(function() {
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -14,6 +31,7 @@
     function DeviceFindOrCreate() {
       this.setCanGet = __bind(this.setCanGet, this);
       this.setCanCreate = __bind(this.setCanCreate, this);
+      this.parseDevice = __bind(this.parseDevice, this);
       this.parse = __bind(this.parse, this);
       this.find = __bind(this.find, this);
       this.create = __bind(this.create, this);
@@ -28,8 +46,10 @@
     DeviceFindOrCreate.prototype.initialize = function() {
       this.on('change:uuid change:token', this.setCanCreate);
       this.on('change:uuid change:token', this.setCanGet);
+      this.on('change:device', this.parseDevice);
       this.setCanCreate();
-      return this.setCanGet();
+      this.setCanGet();
+      return this.parseDevice();
     };
 
     DeviceFindOrCreate.prototype.create = function() {
@@ -60,6 +80,17 @@
       };
     };
 
+    DeviceFindOrCreate.prototype.parseDevice = function() {
+      var json;
+      if (!this.has('device')) {
+        return;
+      }
+      json = JSON.stringify(this.get('device'));
+      return this.deviceEdit = new App.DeviceEdit({
+        json: json
+      });
+    };
+
     DeviceFindOrCreate.prototype.setCanCreate = function() {
       var token, uuid;
       uuid = this.get('uuid');
@@ -86,19 +117,102 @@
 }).call(this);
 
 (function() {
-  var __hasProp = {}.hasOwnProperty,
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   App.Device = (function(_super) {
     __extends(Device, _super);
 
     function Device() {
+      this.saveJSON = __bind(this.saveJSON, this);
       return Device.__super__.constructor.apply(this, arguments);
     }
+
+    Device.prototype.saveJSON = function(json) {
+      var jqueryOptions;
+      jqueryOptions = {
+        headers: {
+          skynet_auth_uuid: this.get('uuid'),
+          skynet_auth_token: this.get('token')
+        }
+      };
+      try {
+        return this.model.save(JSON.parse(json), jqueryOptions);
+      } catch (_error) {
+        this.invalidJson = {
+          json: 'invalid json'
+        };
+        return this.trigger('invalid');
+      }
+    };
 
     return Device;
 
   })(Backbone.Model);
+
+}).call(this);
+
+(function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  App.DeviceEditView = (function(_super) {
+    __extends(DeviceEditView, _super);
+
+    function DeviceEditView() {
+      this.values = __bind(this.values, this);
+      this.submit = __bind(this.submit, this);
+      this.setValues = __bind(this.setValues, this);
+      this.render = __bind(this.render, this);
+      this.initialize = __bind(this.initialize, this);
+      return DeviceEditView.__super__.constructor.apply(this, arguments);
+    }
+
+    DeviceEditView.prototype.template = JST['device-edit'];
+
+    DeviceEditView.prototype.initialize = function() {
+      return this.listenTo(this.model, 'invalid', this.render);
+    };
+
+    DeviceEditView.prototype.events = {
+      'submit form': 'submit',
+      'keyup textarea': 'validateJSON'
+    };
+
+    DeviceEditView.prototype.render = function() {
+      this.$el.html(this.template({
+        validationError: this.model.validationError
+      }));
+      this.setValues();
+      return this.$el;
+    };
+
+    DeviceEditView.prototype.setValues = function() {
+      var device, json;
+      device = this.model.toJSON().device;
+      json = JSON.stringify(device, null, 2);
+      return this.$('textarea[name=json]').val(json);
+    };
+
+    DeviceEditView.prototype.submit = function($event) {
+      var json;
+      $event.preventDefault();
+      $event.stopPropagation();
+      json = this.values().json;
+      return this.model.saveJSON(json);
+    };
+
+    DeviceEditView.prototype.values = function() {
+      return {
+        json: this.$('textarea[name=json]').val()
+      };
+    };
+
+    return DeviceEditView;
+
+  })(Backbone.View);
 
 }).call(this);
 
@@ -126,7 +240,8 @@
     DeviceFindOrCreateView.prototype.className = 'device-find-or-create';
 
     DeviceFindOrCreateView.prototype.initialize = function() {
-      return this.listenTo(this.model, 'change', this.setValues);
+      this.listenTo(this.model, 'change', this.setValues);
+      return this.listenTo(this.model, 'sync', this.render);
     };
 
     DeviceFindOrCreateView.prototype.events = {
@@ -136,8 +251,15 @@
     };
 
     DeviceFindOrCreateView.prototype.render = function() {
+      var view;
       this.$el.html(this.template());
       this.setValues();
+      if (this.model.deviceEdit) {
+        view = new App.DeviceEditView({
+          model: this.model.deviceEdit
+        });
+        this.$el.append(view.render());
+      }
       return this.$el;
     };
 

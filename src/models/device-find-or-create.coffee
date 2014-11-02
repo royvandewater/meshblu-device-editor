@@ -5,8 +5,10 @@ class App.DeviceFindOrCreate extends Backbone.Model
   initialize: =>
     @on 'change:uuid change:token', @setCanCreate
     @on 'change:uuid change:token', @setCanGet
+    @on 'change:device', @parseDevice
     @setCanCreate()
     @setCanGet()
+    @parseDevice()
 
   create: =>
     @save({})
@@ -27,6 +29,11 @@ class App.DeviceFindOrCreate extends Backbone.Model
       token: data.token
       device: data
     }
+
+  parseDevice: =>
+    return unless @has 'device'
+    json = JSON.stringify @get 'device'
+    @deviceEdit = new App.DeviceEdit json: json
 
   setCanCreate: =>
     uuid  = @get 'uuid'

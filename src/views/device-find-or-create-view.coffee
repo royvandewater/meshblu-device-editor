@@ -4,6 +4,7 @@ class App.DeviceFindOrCreateView extends Backbone.View
 
   initialize: =>
     @listenTo @model, 'change', @setValues
+    @listenTo @model, 'sync',   @render
 
   events:
     'keyup input':       'updateModel'
@@ -13,6 +14,9 @@ class App.DeviceFindOrCreateView extends Backbone.View
   render: =>
     @$el.html @template()
     @setValues()
+    if @model.deviceEdit
+      view = new App.DeviceEditView model: @model.deviceEdit
+      @$el.append view.render()
     @$el
 
   setValues: =>

@@ -1,0 +1,10 @@
+<br>
+<form>
+  <div class="form-group">
+    <button class="btn btn-success btn-save">Save</button>
+    <% if @validationError: %>
+      <p class="text-danger"><%= @validationError.json %></p>
+    <% end %>
+  </div>
+  <textarea name="json" cols="30" rows="50" class="col-xs-12"></textarea>
+</form>
