@@ -32,7 +32,7 @@ class App.DeviceFindOrCreate extends Backbone.Model
 
   parseDevice: =>
     return unless @has 'device'
-    json = JSON.stringify @get 'device'
+    json = JSON.stringify @get('device'), null, 2
     @deviceEdit = new App.DeviceEdit json: json
 
   setCanCreate: =>

@@ -12,8 +12,8 @@
     __extends(DeviceEdit, _super);
 
     function DeviceEdit() {
-      this.setDevice = __bind(this.setDevice, this);
       this.parseJSON = __bind(this.parseJSON, this);
+      this.setDevice = __bind(this.setDevice, this);
       this.initialize = __bind(this.initialize, this);
       return DeviceEdit.__super__.constructor.apply(this, arguments);
     }
@@ -23,14 +23,31 @@
       return this.setDevice();
     };
 
-    DeviceEdit.prototype.parseJSON = function() {
-      return JSON;
+    DeviceEdit.prototype.setDevice = function() {
+      var object;
+      object = this.parseJSON();
+      if (object != null) {
+        return this.set({
+          device: object
+        });
+      }
     };
 
-    DeviceEdit.prototype.setDevice = function() {
-      return this.set({
-        device: JSON.parse(this.get('json'))
-      });
+    DeviceEdit.prototype.parseJSON = function() {
+      var object;
+      try {
+        object = JSON.parse(this.get('json'));
+        this.set({
+          jsonIsInvalid: false
+        });
+        return object;
+      } catch (_error) {
+        this.set({
+          jsonIsInvalid: true
+        });
+        this.trigger('invalid');
+        return null;
+      }
     };
 
     return DeviceEdit;
@@ -104,7 +121,7 @@
       if (!this.has('device')) {
         return;
       }
-      json = JSON.stringify(this.get('device'));
+      json = JSON.stringify(this.get('device'), null, 2);
       return this.deviceEdit = new App.DeviceEdit({
         json: json
       });
@@ -181,8 +198,10 @@
     __extends(DeviceEditView, _super);
 
     function DeviceEditView() {
+      this.validateJSON = __bind(this.validateJSON, this);
       this.values = __bind(this.values, this);
       this.submit = __bind(this.submit, this);
+      this.setValidationError = __bind(this.setValidationError, this);
       this.setValues = __bind(this.setValues, this);
       this.render = __bind(this.render, this);
       this.initialize = __bind(this.initialize, this);
@@ -192,12 +211,12 @@
     DeviceEditView.prototype.template = JST['device-edit'];
 
     DeviceEditView.prototype.initialize = function() {
-      return this.listenTo(this.model, 'invalid', this.render);
+      return this.listenTo(this.model, 'change:jsonIsInvalid', this.setValidationError);
     };
 
     DeviceEditView.prototype.events = {
       'submit form': 'submit',
-      'keyup textarea': 'validateJSON'
+      'keyup textarea[name=json]': 'validateJSON'
     };
 
     DeviceEditView.prototype.render = function() {
@@ -205,14 +224,21 @@
         validationError: this.model.validationError
       }));
       this.setValues();
+      this.setValidationError();
       return this.$el;
     };
 
     DeviceEditView.prototype.setValues = function() {
-      var device, json;
-      device = this.model.toJSON().device;
-      json = JSON.stringify(device, null, 2);
+      var json;
+      json = this.model.toJSON().json;
       return this.$('textarea[name=json]').val(json);
+    };
+
+    DeviceEditView.prototype.setValidationError = function() {
+      var jsonIsInvalid;
+      jsonIsInvalid = this.model.toJSON().jsonIsInvalid;
+      this.$('.text-invalid-json').toggle(jsonIsInvalid);
+      return this.$('.btn-save').prop('disabled', jsonIsInvalid);
     };
 
     DeviceEditView.prototype.submit = function($event) {
@@ -227,6 +253,14 @@
       return {
         json: this.$('textarea[name=json]').val()
       };
+    };
+
+    DeviceEditView.prototype.validateJSON = function() {
+      var json;
+      json = this.values().json;
+      return this.model.set('json', json, {
+        validate: true
+      });
     };
 
     return DeviceEditView;

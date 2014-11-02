@@ -40,15 +40,7 @@ window.JST["device-edit"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<br>\n<form>\n  <div class="form-group">\n    <button class="btn btn-success btn-save">Save</button>\n    ');
-    
-      if (this.validationError) {
-        __out.push('\n      <p class="text-danger">');
-        __out.push(__sanitize(this.validationError.json));
-        __out.push('</p>\n    ');
-      }
-    
-      __out.push('\n  </div>\n  <textarea name="json" cols="30" rows="50" class="col-xs-12"></textarea>\n</form>\n');
+      __out.push('<br>\n<form>\n  <div class="form-group">\n    <button class="btn btn-success btn-save">Save</button>\n    <span class="text-danger text-invalid-json">\n      Invalid JSON\n    </span>\n  </div>\n  <textarea name="json" cols="30" rows="50" class="col-xs-12"></textarea>\n</form>\n');
     
     }).call(this);
     

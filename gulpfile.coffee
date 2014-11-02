@@ -28,7 +28,7 @@ gulp.task 'eco', ->
 
 gulp.task 'webserver', ->
   gulp.src ['.']
-      .pipe webserver(livereload: true)
+      .pipe webserver()
 
 gulp.task 'default', ['coffee', 'eco'], ->
 

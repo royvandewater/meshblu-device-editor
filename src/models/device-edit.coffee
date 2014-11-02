@@ -3,8 +3,17 @@ class App.DeviceEdit extends Backbone.Model
     @on 'change:json', @setDevice
     @setDevice()
 
-  parseJSON: =>
-    JSON
-
   setDevice: =>
-    @set device: JSON.parse(@get('json'))
+    object = @parseJSON()
+    if object?
+      @set device: object
+
+  parseJSON: =>
+    try
+      object = JSON.parse @get('json')
+      @set jsonIsInvalid: false
+      return object
+    catch
+      @set jsonIsInvalid: true
+      @trigger 'invalid'
+      return null

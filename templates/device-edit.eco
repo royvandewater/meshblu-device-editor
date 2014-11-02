@@ -2,9 +2,9 @@
 <form>
   <div class="form-group">
     <button class="btn btn-success btn-save">Save</button>
-    <% if @validationError: %>
-      <p class="text-danger"><%= @validationError.json %></p>
-    <% end %>
+    <span class="text-danger text-invalid-json">
+      Invalid JSON
+    </span>
   </div>
   <textarea name="json" cols="30" rows="50" class="col-xs-12"></textarea>
 </form>
